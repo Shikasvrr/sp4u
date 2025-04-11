@@ -129,7 +129,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 2000;
+            z-index: 1000;
             text-align: center;
         }
 
@@ -225,7 +225,7 @@
     <div id="game-board">
         <div class="grid" id="grid"></div>
         <div class="game-message" id="game-message">
-            <p>Вы победили! хихи</p>
+            <p id="game-status-text">Ты победил! хихик🙂‍↔️</p>
             <button class="reward-button" id="reward-button">Получить приятность</button>
             <button class="restart-button" id="restart-button">Новая игра</button>
         </div>
@@ -259,7 +259,21 @@
             let gameWon = false;
             let touchStartX = 0;
             let touchStartY = 0;
-            // Инициализация игры
+            function isGameOver() {
+    for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 4; j++) {
+            if (board[i][j] === 0) return false;
+
+            // Проверка на возможные объединения по горизонтали и вертикали
+            if (j < 3 && board[i][j] === board[i][j + 1]) return false;
+            if (i < 3 && board[i][j] === board[i + 1][j]) return false;
+        }
+    }
+
+    // Нет ни пустых клеток, ни возможных ходов
+    return true;
+}
+
             function initGame() {
                 board = [
                     [0, 0, 0, 0],
@@ -460,19 +474,18 @@
                 return moved;
             }
 
-            // Двигаем плитки вниз
-            function moveDown() {
+                       // Двигаем плитки вниз
+                       function moveDown() {
                 let moved = false;
 
                 for (let j = 0; j < 4; j++) {
                     let column = [];
 
-                    for (let i = 0; i < 4; i++) {
+                    for (let i = 3; i >= 0; i--) {
                         column.push(board[i][j]);
                     }
 
-                    const reversedColumn = [...column].reverse();
-                    const filteredColumn = reversedColumn.filter(val => val !== 0);
+                    const filteredColumn = column.filter(val => val !== 0);
                     const newColumn = [];
 
                     for (let i = 0; i < filteredColumn.length; i++) {
@@ -480,11 +493,11 @@
                             const mergedValue = filteredColumn[i] * 2;
                             newColumn.push(mergedValue);
                             score += mergedValue;
-                            
+
                             if (mergedValue === 2084 || score >= 2000) {
                                 gameWon = true;
                             }
-                            
+
                             i++;
                             moved = true;
                         } else {
@@ -506,176 +519,107 @@
                     }
                 }
 
+                if (gameWon) {
+                    gameMessage.classList.add('game-won');
+                    restartButton.style.display = 'inline-block';
+                }
+
                 return moved;
             }
 
-            // Проверяем, равны ли два массива
+            // Вспомогательная функция сравнения массивов
             function arraysEqual(a, b) {
-                if (a.length !== b.length) return false;
-                for (let i = 0; i < a.length; i++) {
-                    if (a[i] !== b[i]) return false;
-                }
-                return true;
+                return a.length === b.length && a.every((val, index) => val === b[index]);
             }
 
-            // Проверяем, есть ли возможные ходы
-            function hasValidMoves() {
-                for (let i = 0; i < 4; i++) {
-                    for (let j = 0; j < 4; j++) {
-                        if (board[i][j] === 0) {
-                            return true;
-                        }
-                    }
-                }
+            // Обработка свайпов и клавиш
+            function handleMove(direction) {
+                let moved = false;
 
-                for (let i = 0; i < 4; i++) {
-                    for (let j = 0; j < 3; j++) {
-                        if (board[i][j] === board[i][j + 1]) {
-                            return true;
-                        }
-                    }
+                switch (direction) {
+                    case 'left':
+                        moved = moveLeft();
+                        break;
+                    case 'right':
+                        moved = moveRight();
+                        break;
+                    case 'up':
+                        moved = moveUp();
+                        break;
+                    case 'down':
+                        moved = moveDown();
+                        break;
                 }
 
-                for (let j = 0; j < 4; j++) {
-                    for (let i = 0; i < 3; i++) {
-                        if (board[i][j] === board[i + 1][j]) {
-                            return true;
-                        }
-                    }
-                }
+                if (moved) {
+                    addRandomTile();
+                    updateBoard();
+                    scoreDisplay.textContent = score;
 
-                return false;
-            }
-
-            // Показ полноэкранного изображения
-            function showReward() {
-                rewardImage.src = 'images/win.JPG';
-                fullscreenImage.style.display = 'flex';
-                
-                rewardImage.onerror = function() {
-                    alert('Изображение не найдено! Поместите файл reward.jpg в папку с игрой');
-                    fullscreenImage.style.display = 'none';
-                    restartButton.style.display = 'block';
-                };
-            }
-
-            // Закрытие полноэкранного изображения
-            function closeReward() {
-                fullscreenImage.style.display = 'none';
-                restartButton.style.display = 'block';
-            }
-
-            // Обработка нажатий клавиш
-            function handleKeyPress(e) {
-    if (gameWon) return;
-
-    let moved = false;
-
-    switch (e.key) {
-        case 'ArrowLeft':
-            moved = moveLeft();
-            break;
-        case 'ArrowRight':
-            moved = moveRight();
-            break;
-        case 'ArrowUp':
-            moved = moveUp();
-            break;
-        case 'ArrowDown':
-            moved = moveDown();
-            break;
-        default:
-            return;
-    }
-
-    if (moved) {
-        addRandomTile();
-        updateBoard();
-        scoreDisplay.textContent = score;
-
-        if (score > bestScore) {
-            bestScore = score;
-            bestScoreDisplay.textContent = bestScore;
-            localStorage.setItem('bestScore', bestScore);
-        }
-
-        if (gameWon) {
-            gameMessage.classList.add('game-won');
-            gameMessage.querySelector('p').textContent = 'Ты победил!';
-            restartButton.style.display = 'none';
-            rewardButton.style.display = 'block';
-        } else if (!hasValidMoves()) {
-            gameMessage.classList.add('game-won');
-            restartButton.style.display = 'block';
-
-            if (score >= 2000) {
-                gameMessage.querySelector('p').textContent = 'Ты почти у цели!';
-                rewardButton.style.display = 'block';
-            } else {
-                gameMessage.querySelector('p').textContent = 'Попробуй еще разочек!';
-                rewardButton.style.display = 'none';
-            }
-        }
-    }
+                    if (gameWon) {
+    document.getElementById('game-status-text').textContent = 'Ты победил! хихик 🙂‍↔️';
+    gameMessage.classList.add('game-won');
+    rewardButton.style.display = 'inline-block';
+    restartButton.style.display = 'inline-block';
+} else if (isGameOver()) {
+    document.getElementById('game-status-text').textContent = 'Попробуй еще разок';
+    gameMessage.classList.add('game-won');
+    rewardButton.style.display = 'none'; // <--- скрываем приятность!
+    restartButton.style.display = 'inline-block';
 }
-
-            // Обработка свайпов на сенсорных устройствах
-            function handleTouchStart(e) {
-                touchStartX = e.touches[0].clientX;
-                touchStartY = e.touches[0].clientY;
-            }
-
-            function handleTouchEnd(e) {
-                if (!touchStartX || !touchStartY || gameWon) return;
-
-                const touchEndX = e.changedTouches[0].clientX;
-                const touchEndY = e.changedTouches[0].clientY;
-
-                const diffX = touchStartX - touchEndX;
-                const diffY = touchStartY - touchEndY;
-
-                if (Math.abs(diffX) > Math.abs(diffY)) {
-                    if (diffX > 0) {
-                        simulateKeyPress('ArrowLeft');
-                    } else {
-                        simulateKeyPress('ArrowRight');
-                    }
-                } else {
-                    if (diffY > 0) {
-                        simulateKeyPress('ArrowUp');
-                    } else {
-                        simulateKeyPress('ArrowDown');
-                    }
                 }
-
-                touchStartX = 0;
-                touchStartY = 0;
             }
 
-            function simulateKeyPress(key) {
-                const event = new KeyboardEvent('keydown', { key: key });
-                handleKeyPress(event);
-            }
-
-            // Назначаем обработчики событий
-            document.addEventListener('keydown', handleKeyPress);
-            document.addEventListener('touchstart', handleTouchStart, false);
-            document.addEventListener('touchend', handleTouchEnd, false);
-            restartButton.addEventListener('click', initGame);
-            rewardButton.addEventListener('click', showReward);
-            closeButton.addEventListener('click', closeReward);
-            fullscreenImage.addEventListener('click', function(e) {
-                if (e.target === fullscreenImage) {
-                    closeReward();
+            document.addEventListener('keydown', (e) => {
+                switch (e.key) {
+                    case 'ArrowLeft':
+                        handleMove('left');
+                        break;
+                    case 'ArrowRight':
+                        handleMove('right');
+                        break;
+                    case 'ArrowUp':
+                        handleMove('up');
+                        break;
+                    case 'ArrowDown':
+                        handleMove('down');
+                        break;
                 }
             });
 
-            // Показываем кнопку "Новая игра" после загрузки изображения
-            rewardImage.onload = function() {
-                restartButton.style.display = 'block';
-            };
+            // Обработка свайпов на сенсорных экранах
+            grid.addEventListener('touchstart', (e) => {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+            });
 
-            // Начинаем игру
+            grid.addEventListener('touchend', (e) => {
+                const dx = e.changedTouches[0].clientX - touchStartX;
+                const dy = e.changedTouches[0].clientY - touchStartY;
+
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    if (dx > 30) handleMove('right');
+                    else if (dx < -30) handleMove('left');
+                } else {
+                    if (dy > 30) handleMove('down');
+                    else if (dy < -30) handleMove('up');
+                }
+            });
+
+            // Показ изображения по кнопке "Приятность"
+            rewardButton.addEventListener('click', () => {
+                rewardImage.src = 'images/WIN.JPG'; // Убедись, что путь правильный
+                fullscreenImage.style.display = 'flex';
+            });
+
+            closeButton.addEventListener('click', () => {
+                fullscreenImage.style.display = 'none';
+            });
+
+            restartButton.addEventListener('click', () => {
+                initGame();
+            });
+
             initGame();
         });
     </script>
