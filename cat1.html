@@ -237,7 +237,7 @@
     </div>
 
     <div class="instructions">
-        Это классическая версия игры с циферками. Свайпай туда-сюда, чтобы цифры объединялись.<br>
+        Это классическая версия игры с циферками. Свайпай туда-сюда (легонько), чтобы цифры объединялись.<br>
         Дойдешь до 2000 очков - получишь приятность 👀
     </div>
 
@@ -567,48 +567,57 @@
 
             // Обработка нажатий клавиш
             function handleKeyPress(e) {
-                if (gameWon) return;
+    if (gameWon) return;
 
-                let moved = false;
+    let moved = false;
 
-                switch (e.key) {
-                    case 'ArrowLeft':
-                        moved = moveLeft();
-                        break;
-                    case 'ArrowRight':
-                        moved = moveRight();
-                        break;
-                    case 'ArrowUp':
-                        moved = moveUp();
-                        break;
-                    case 'ArrowDown':
-                        moved = moveDown();
-                        break;
-                    default:
-                        return;
-                }
+    switch (e.key) {
+        case 'ArrowLeft':
+            moved = moveLeft();
+            break;
+        case 'ArrowRight':
+            moved = moveRight();
+            break;
+        case 'ArrowUp':
+            moved = moveUp();
+            break;
+        case 'ArrowDown':
+            moved = moveDown();
+            break;
+        default:
+            return;
+    }
 
-                if (moved) {
-                    addRandomTile();
-                    updateBoard();
-                    scoreDisplay.textContent = score;
+    if (moved) {
+        addRandomTile();
+        updateBoard();
+        scoreDisplay.textContent = score;
 
-                    if (score > bestScore) {
-                        bestScore = score;
-                        bestScoreDisplay.textContent = bestScore;
-                        localStorage.setItem('bestScore', bestScore);
-                    }
+        if (score > bestScore) {
+            bestScore = score;
+            bestScoreDisplay.textContent = bestScore;
+            localStorage.setItem('bestScore', bestScore);
+        }
 
-                    if (gameWon) {
-                        gameMessage.classList.add('game-won');
-                        restartButton.style.display = 'none';
-                    } else if (!hasValidMoves()) {
-                        gameMessage.querySelector('p').textContent = 'Игра окончена!';
-                        gameMessage.classList.add('game-won');
-                        restartButton.style.display = 'block';
-                    }
-                }
+        if (gameWon) {
+            gameMessage.classList.add('game-won');
+            gameMessage.querySelector('p').textContent = 'Ты победил!';
+            restartButton.style.display = 'none';
+            rewardButton.style.display = 'block';
+        } else if (!hasValidMoves()) {
+            gameMessage.classList.add('game-won');
+            restartButton.style.display = 'block';
+
+            if (score >= 2000) {
+                gameMessage.querySelector('p').textContent = 'Ты почти у цели!';
+                rewardButton.style.display = 'block';
+            } else {
+                gameMessage.querySelector('p').textContent = 'Попробуй еще разочек!';
+                rewardButton.style.display = 'none';
             }
+        }
+    }
+}
 
             // Обработка свайпов на сенсорных устройствах
             function handleTouchStart(e) {
