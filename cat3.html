@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мотивационное аудио с котиком</title>
+    <style>
+        @font-face {
+    font-family: 'CarloMelowSans';
+    font-style: italic;
+    src: url(fonts/CarloMelowSans.woff2);
+}
+@font-face {
+    font-family: 'CarloMelow';
+    src: url(fonts/CarloMelow.woff2);
+}
+@font-face {
+    font-family: 'TransformaMix';
+    font-style: light;
+   src: url(fonts/TransformaMixLight.woff2);
+}
+@font-face {
+    font-family: 'TransformaMix';
+    font-style: regular;
+   src: url(fonts/TransformaMixRegular.woff2);
+}
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #8e44ad, #9b59b6, #d2b4de);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            color: white;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+            margin: 20px;
+            z-index: 1;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        h1 {
+            color: white;
+            margin-bottom: 30px;
+            font-family: 'CarloMelowSans';
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        p {
+            color: #f0e6ff;
+        }
+
+        .motivation-btn {
+            background-color: #6a1b9a;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            font-family: 'TransformaMix';
+            font-style: regular;
+        }
+
+        .motivation-btn:hover {
+            background-color: #8e24aa;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .audio-container {
+            width: 100%;
+            margin-top: 30px;
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        audio {
+            width: 100%;
+            outline: none;
+            border-radius: 50px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .cat {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 150px;
+            height: 150px;
+            z-index: 10;
+            cursor: pointer;
+            background-image: url('images/kotikakula.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: bottom right;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .message {
+            position: absolute;
+            bottom: 180px;
+            right: 10px;
+            background-color: white;
+            color: #6a1b9a;
+            padding: 10px 15px;
+            border-radius: 15px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            max-width: 150px;
+            display: none;
+            z-index: 20;
+            font-size: 14px;
+        }
+
+        .message:after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            right: 20px;
+            border-width: 10px 10px 0;
+            border-style: solid;
+            border-color: white transparent;
+        }
+
+        /* Адаптация для телефонов */
+        @media (max-width: 450px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 24px;
+                font-family: 'CarloMelow';
+            }
+            
+            .motivation-btn {
+                font-family: TransformaMix;
+                font-style: regular;
+                padding: 12px 24px;
+                font-size: 16px;
+            }
+            
+            .cat {
+                width: 140px;
+                height: 140px;
+            }
+            
+            .message {
+                bottom: 150px;
+                max-width: 130px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ВЫ ПОПАЛИ НА АУДИО-МОТИВАШКУ!</h1>
+        <p>Тыкни на кнопку, чтобы послушать</p>
+        
+        <button class="motivation-btn" id="playBtn">Послушать мотивашку</button>
+        
+        <div class="audio-container" id="audioContainer">
+            <audio controls id="motivationAudio">
+                <source src="audio/audiom.mp3" type="audio/mpeg">
+                Ваш браузер не поддерживает аудио элемент.
+            </audio>
+        </div>
+    </div>
+
+    <!-- Котик из локального файла -->
+    <div class="cat" id="cat"></div>
+
+    <div class="message" id="catMessage">Слушай внимательно! Мяу!</div>
+
+    <script>
+        const playBtn = document.getElementById('playBtn');
+        const audioContainer = document.getElementById('audioContainer');
+        const motivationAudio = document.getElementById('motivationAudio');
+        const cat = document.getElementById('cat');
+        const catMessage = document.getElementById('catMessage');
+
+        // Показать/скрыть аудио плеер
+        playBtn.addEventListener('click', function() {
+            if (audioContainer.style.display === 'block') {
+                motivationAudio.pause();
+                audioContainer.style.display = 'none';
+                playBtn.textContent = 'Послушать мотивашку';
+            } else {
+                audioContainer.style.display = 'block';
+                motivationAudio.play();
+                playBtn.textContent = 'Скрыть аудио';
+                showCatMessage();
+            }
+        });
+
+        // Показать сообщение котика
+        function showCatMessage() {
+            const messages = [
+                "Посылаю лучи пушистой поддержки!"
+            ];
+            
+            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+            catMessage.textContent = randomMessage;
+            catMessage.style.display = 'block';
+            
+            setTimeout(() => {
+                catMessage.style.display = 'none';
+            }, 3000);
+        }
+
+        // Клик по котику
+        cat.addEventListener('click', showCatMessage);
+    </script>
+</body>
+</html>

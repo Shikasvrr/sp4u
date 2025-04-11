@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мотивационный генератор</title>
+    <style>
+@font-face {
+    font-family: 'CarloMelowSans';
+    font-style: italic;
+    src: url(fonts/CarloMelowSans.woff2);
+}
+@font-face {
+    font-family: 'CarloMelow';
+    src: url(fonts/CarloMelow.woff2);
+}
+@font-face {
+    font-family: 'TransformaMix';
+    font-style: light;
+   src: url(fonts/TransformaMixLight.woff2);
+}
+@font-face {
+    font-family: 'TransformaMix';
+    font-style: regular;
+   src: url(fonts/TransformaMixRegular.woff2);
+}
+        body {
+            text-align: center;
+            background-color: #E6E6FA; /* Лавандовый фон */
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        
+        .container {
+            background-color: #FFFFFF;
+            font-family: TransformaMix;
+            font-style: regular;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(148, 0, 211, 0.2); /* Фиолетовая тень */
+            max-width: 800px;
+            width: 90%;
+        }
+        
+        h1 {
+            color: #9370DB; /* Средний лавандово-фиолетовый */
+            margin-bottom: 20px;
+            font-family: CarloMelowSans;
+            font-style: light;
+            text-shadow: 1px 1px 2px rgba(147, 112, 219, 0.3);
+        }
+        
+        p {
+            color: #4B0082; /* Индиго */
+        }
+        
+        .image-container {
+            margin: 20px 0;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+        }
+        
+        .motivation-image {
+            max-width: 100%;
+            max-height: 500px;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(147, 112, 219, 0.3);
+            display: none;
+            border: 3px solid #ad9ad3; /* Лавандово-фиолетовая обводка */
+            padding: 5px;
+            background-color: white;
+            box-sizing: border-box;
+        }
+        
+        .btn {
+            background-color: #9370DB; /* Средний лавандово-фиолетовый */
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 18px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            box-shadow: 0 3px 5px rgba(147, 112, 219, 0.4);
+        }
+        
+        .btn:hover {
+            background-color: #8A2BE2; /* Сине-фиолетовый */
+            transform: translateY(-2px);
+            box-shadow: 0 5px 8px rgba(147, 112, 219, 0.5);
+        }
+        
+        .loading {
+            display: none;
+            font-style: italic;
+            color: #9370DB;
+            margin: 20px 0;
+        }
+        
+        .progress {
+            margin-top: 15px;
+            color: #6A5ACD; /* Сланцево-синий */
+            font-size: 14px;
+        }
+
+        /* Анимация для плавного появления */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .motivation-image {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Вы попали на страничку мотивашек!</h1>
+        <p>Тыкни на кнопку, чтобы получить случайную мотивашку</p>
+        
+        <div class="image-container">
+            <img class="motivation-image" id="motivation-image" alt="Мотивационное изображение">
+            <p class="loading" id="loading">Загружаем мотивашку...</p>
+        </div>
+        
+        <button class="btn" id="generate-btn">Получить мотивашку</button>
+        <p class="progress" id="progress"></p>
+    </div>
+
+    <script>
+        // Список изображений (замените на свои пути к файлам)
+        const imageList = [
+            'images/1.jpg',
+            'images/2.jpg',
+            'images/3.jpg',
+            'images/4.jpg',
+            'images/5.jpg',
+            'images/6.jpg',
+            'images/7.jpg',
+            'images/8.jpg',
+            'images/9.jpg',
+            'images/10.jpg',
+            'images/11.jpg',
+            'images/12.jpg',
+            'images/13.jpg',
+            'images/14.jpg',
+            'images/15.jpg',
+            'images/16.jpg',
+            'images/17.jpg',
+            'images/18.jpg',
+            'images/19.jpg',
+            'images/20.jpg',
+            'images/21.jpg',
+            'images/22.jpg',
+            'images/23.jpg',
+            'images/24.jpg',
+            'images/25.jpg',
+            'images/26.jpg',
+            'images/27.jpg',
+            'images/28.jpg',
+            'images/29.jpg',
+            'images/31.jpg',
+            'images/32.jpg',
+            'images/33.jpg',
+            'images/34.jpg',
+            'images/35.jpg',
+            'images/36.jpg',
+            'images/37.jpg',
+            'images/38.jpg',
+            'images/39.jpg',
+            'images/40.jpg',
+            'images/41.jpg',
+            'images/42.jpg',
+            'images/43.jpg',
+        ];
+        
+        const generateBtn = document.getElementById('generate-btn');
+        const loadingText = document.getElementById('loading');
+        const motivationImage = document.getElementById('motivation-image');
+        const progressText = document.getElementById('progress');
+        
+        let availableImages = [...imageList];
+        let usedImages = [];
+        
+        // Проверка доступности изображений
+        function checkImagesAvailability() {
+            const verifiedImages = [];
+            
+            availableImages.forEach(imgPath => {
+                const img = new Image();
+                img.src = imgPath;
+                verifiedImages.push(imgPath);
+            });
+            
+            return verifiedImages;
+        }
+        
+        // Генерация случайного изображения без повторений
+        function getRandomImage() {
+            if (availableImages.length === 0) {
+                // Если все изображения показаны, начинаем заново
+                if (usedImages.length === 0) {
+                    alert('Нет доступных изображений. Проверьте пути к файлам.');
+                    return null;
+                }
+                
+                // Перемешиваем и начинаем новый цикл
+                availableImages = [...usedImages];
+                usedImages = [];
+                progressText.textContent = `Начинаем новый цикл (${availableImages.length} изображений)`;
+            }
+            
+            const randomIndex = Math.floor(Math.random() * availableImages.length);
+            const selectedImage = availableImages[randomIndex];
+            
+            // Перемещаем изображение из доступных в использованные
+            availableImages.splice(randomIndex, 1);
+            usedImages.push(selectedImage);
+            
+            return selectedImage;
+        }
+        
+        // Показать случайное изображение
+        function showRandomImage() {
+            motivationImage.style.display = 'none';
+            loadingText.style.display = 'block';
+            
+            setTimeout(() => {
+                const randomImagePath = getRandomImage();
+                
+                if (randomImagePath) {
+                    motivationImage.onload = function() {
+                        loadingText.style.display = 'none';
+                        motivationImage.style.display = 'block';
+                    };
+                    
+                    motivationImage.onerror = function() {
+                        loadingText.style.display = 'none';
+                        alert('Ошибка загрузки изображения');
+                        // Удаляем нерабочее изображение из списка
+                        const index = imageList.indexOf(randomImagePath);
+                        if (index > -1) {
+                            imageList.splice(index, 1);
+                        }
+                    };
+                    
+                    motivationImage.src = randomImagePath + '?t=' + new Date().getTime();
+                }
+            }, 300);
+        }
+        
+        // Инициализация
+        generateBtn.addEventListener('click', showRandomImage);        
+        // Проверка доступности изображений при запуске
+        window.addEventListener('load', () => {
+            const testImage = new Image();
+            testImage.src = imageList[0];
+            testImage.onerror = () => {
+                alert('Внимание: Возможно, указаны неправильные пути к изображениям.\nПроверьте, что файлы существуют по указанным путям.');
+            };
+        });
+    </script>
+</body>
+</html>
