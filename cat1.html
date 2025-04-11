@@ -186,6 +186,7 @@
         .fullscreen-image img {
             max-width: 90%;
             max-height: 90%;
+            z-index: 2000;
             border: 3px solid #9370DB;
             border-radius: 10px;
         }
@@ -609,7 +610,7 @@
 
             // Показ изображения по кнопке "Приятность"
             rewardButton.addEventListener('click', () => {
-                rewardImage.src = 'images/WIN.JPG'; // Убедись, что путь правильный
+                rewardImage.src = 'images/win.JPG'; // Убедись, что путь правильный
                 fullscreenImage.style.display = 'flex';
             });
 
