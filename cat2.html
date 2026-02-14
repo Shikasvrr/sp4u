@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Мотивационный генератор</title>
+
+<style>
+@font-face {
+    font-family: 'CarloMelowSans';
+    font-style: italic;
+    src: url(fonts/CarloMelowSans.woff2);
+}
+@font-face {
+    font-family: 'CarloMelow';
+    src: url(fonts/CarloMelow.woff2);
+}
+@font-face {
+    font-family: 'TransformaMix';
+    font-style: light;
+    src: url(fonts/TransformaMixLight.woff2);
+}
+@font-face {
+    font-family: 'TransformaMix';
+    font-style: regular;
+    src: url(fonts/TransformaMixRegular.woff2);
+}
+
+/* ===== ФОН ===== */
+body {
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+
+    background: radial-gradient(circle at top, #ffb6c1 0%, #b8004a 55%, #2a0015 100%);
+    color: white;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* мягкие сердечки */
+body::after {
+    content: "❤   ❤    ❤  ❤   ❤     ❤   ❤   ❤";
+    position: fixed;
+    left: -5%;
+    right: -5%;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: pre;
+    font-size: 34px;
+    color: rgba(255, 255, 255, 0.08);
+    transform: rotate(-12deg);
+    pointer-events: none;
+}
+
+/* ===== КАРТОЧКА ===== */
+.container {
+    background: rgba(255, 255, 255, 0.18);
+    font-family: TransformaMix;
+    border-radius: 22px;
+    padding: 34px 28px;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.25);
+    max-width: 800px;
+    width: 90%;
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+h1 {
+    color: #ffe6ef;
+    margin-bottom: 20px;
+    font-family: CarloMelowSans;
+    text-shadow: 0 2px 14px rgba(255,105,180,0.4);
+}
+
+p {
+    color: #ffe6ef;
+}
+
+/* ===== КАРТИНКА ===== */
+.image-container {
+    margin: 20px 0;
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+}
+
+.motivation-image {
+    max-width: 100%;
+    max-height: 500px;
+    border-radius: 12px;
+    box-shadow: 0 10px 26px rgba(0,0,0,0.25);
+    display: none;
+    border: 4px solid rgba(255,255,255,0.6);
+    padding: 6px;
+    background-color: white;
+    box-sizing: border-box;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* ===== КНОПКА ===== */
+.btn {
+    background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
+    color: #d40055;
+    border: none;
+    padding: 14px 50px 14px 28px;
+    font-size: 18px;
+    border-radius: 40px;
+    cursor: pointer;
+    transition: all 0.25s;
+    margin-top: 10px;
+    box-shadow: 0 12px 24px rgba(0,0,0,0.25);
+    position: relative;
+    font-family: TransformaMix;
+}
+
+.btn::after{
+    content:"❤";
+    position:absolute;
+    right:18px;
+    top:50%;
+    transform:translateY(-50%);
+    color:#ff4d88;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 30px rgba(0,0,0,0.3);
+}
+
+/* ===== ПРОЧЕЕ ===== */
+.loading {
+    display: none;
+    font-style: italic;
+    color: #ffe6ef;
+    margin: 20px 0;
+}
+
+.progress {
+    margin-top: 15px;
+    color: #ffe6ef;
+    font-size: 14px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+    <h1>Вы попали на страничку мотивашек!</h1>
+    <p>Тыкни на кнопку, чтобы получить случайную мотивашку</p>
+
+    <div class="image-container">
+        <img class="motivation-image" id="motivation-image" alt="Мотивационное изображение">
+        <p class="loading" id="loading">Загружаем мотивашку...</p>
+    </div>
+
+    <button class="btn" id="generate-btn">Получить мотивашку</button>
+    <p class="progress" id="progress"></p>
+</div>
+
+<script>
+/* твой JS полностью без изменений */
+const imageList = [
+'images/1.jpg','images/2.jpg','images/3.jpg','images/4.jpg','images/5.jpg',
+'images/6.jpg','images/7.jpg','images/8.jpg','images/9.jpg','images/10.jpg',
+'images/11.jpg','images/12.jpg','images/13.jpg','images/14.jpg','images/15.jpg',
+'images/16.jpg','images/17.jpg','images/18.jpg','images/19.jpg','images/20.jpg',
+'images/21.jpg','images/22.jpg','images/23.jpg','images/24.jpg','images/25.jpg',
+'images/26.jpg','images/27.jpg','images/28.jpg','images/29.jpg','images/31.jpg',
+'images/32.jpg','images/33.jpg','images/34.jpg','images/35.jpg','images/36.jpg',
+'images/37.jpg','images/38.jpg','images/39.jpg','images/40.jpg','images/41.jpg',
+'images/42.jpg','images/43.jpg','images/44.jpg','images/45.jpg','images/46.jpg',
+'images/47.jpg','images/48.jpg','images/49.jpg','images/50.jpg','images/51.jpg',
+'images/52.jpg','images/53.jpg','images/54.jpg','images/55.jpg'
+];
+
+const generateBtn=document.getElementById('generate-btn');
+const loadingText=document.getElementById('loading');
+const motivationImage=document.getElementById('motivation-image');
+const progressText=document.getElementById('progress');
+
+let availableImages=[...imageList];
+let usedImages=[];
+
+function getRandomImage(){
+    if(availableImages.length===0){
+        availableImages=[...usedImages];
+        usedImages=[];
+    }
+    const randomIndex=Math.floor(Math.random()*availableImages.length);
+    const selectedImage=availableImages[randomIndex];
+    availableImages.splice(randomIndex,1);
+    usedImages.push(selectedImage);
+    return selectedImage;
+}
+
+function showRandomImage(){
+    motivationImage.style.display='none';
+    loadingText.style.display='block';
+
+    setTimeout(()=>{
+        const randomImagePath=getRandomImage();
+        motivationImage.onload=function(){
+            loadingText.style.display='none';
+            motivationImage.style.display='block';
+        };
+        motivationImage.src=randomImagePath+'?t='+new Date().getTime();
+    },300);
+}
+
+generateBtn.addEventListener('click',showRandomImage);
+</script>
+</body>
+</html>
