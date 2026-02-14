@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     let board = [];
     let score = 0;
-    let winImageUrl = 'win-image.jpg'; // Путь к изображению в локальной папке
+    let winImageUrl = 'images/win.png'; // Путь к изображению в локальной папке
     
     // Инициализация игры
     function initGame() {

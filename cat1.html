@@ -17,13 +17,12 @@
       src: url(fonts/TransformaMixRegular.woff2);
     }
 
-    /* ===== iOS fix: одинаковый фон на html и body + корректная высота ===== */
     html, body {
       width: 100%;
       height: 100%;
       margin: 0;
-      overflow: hidden;               /* запрет скролла */
-      overscroll-behavior: none;      /* запрет "резинки" */
+      overflow: hidden;
+      overscroll-behavior: none;
       background: radial-gradient(circle at top, #ffb6c1 0%, #7a003c 55%, #2a0015 100%);
     }
 
@@ -36,7 +35,6 @@
       align-items: center;
       justify-content: center;
 
-      /* iOS: 100vh глючит из-за адресной строки -> используем dvh/svh */
       height: 100vh;
       height: 100dvh;
       min-height: 100svh;
@@ -47,10 +45,9 @@
 
       position: relative;
       overflow: hidden;
-      touch-action: none; /* важно: запрещаем любые дефолтные жесты на body */
+      touch-action: none;
     }
 
-    /* мягкие огоньки */
     body::before {
       content: "";
       position: fixed;
@@ -65,7 +62,6 @@
       filter: blur(0.2px);
     }
 
-    /* фоновый паттерн сердечек (на телефоне отключим ниже) */
     body::after {
       content: "❤  ❤   ❤    ❤  ❤   ❤     ❤   ❤";
       position: fixed;
@@ -121,11 +117,8 @@
     .score-title { font-size: 14px; margin-bottom: 5px; opacity: 0.9; }
     .score-value { font-size: 24px; font-weight: bold; }
 
-    /* ===== доска: auto-fit под телефон + не вылезает по высоте ===== */
     #game-board {
       width: clamp(280px, 92vw, 450px);
-
-      /* самое важное: чтобы низ с инструкцией помещался, а страница не скроллилась */
       max-height: calc(100dvh - 200px);
       max-height: calc(100svh - 200px);
 
@@ -143,8 +136,6 @@
       grid-template-columns: repeat(4, 1fr);
       grid-gap: 12px;
       margin-bottom: 12px;
-
-      /* ключ: запрещаем браузеру скроллить/зумить на жестах по полю */
       touch-action: none;
     }
 
@@ -172,7 +163,6 @@
       user-select: none;
     }
 
-    /* сердечко в плитке (НА ПК красиво, НО НА МОБИЛЕ ОТКЛЮЧИМ) */
     .tile::after {
       content: "❤";
       position: absolute;
@@ -241,12 +231,6 @@
       transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
 
-    .reward-button:hover,
-    .restart-button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 14px 24px rgba(0,0,0,0.22);
-    }
-
     .restart-button { border-radius: 12px; display: none; }
 
     .fullscreen-image {
@@ -254,27 +238,42 @@
       position: fixed;
       inset: 0;
       background-color: rgba(0, 0, 0, 0.88);
-      z-index: 2000;
+      z-index: 3000;
       justify-content: center;
       align-items: center;
+      padding: 18px;
+      box-sizing: border-box;
     }
 
     .fullscreen-image img {
-      max-width: 90%;
-      max-height: 90%;
-      z-index: 2000;
+      max-width: min(92vw, 520px);
+      max-height: 86vh;
       border: 3px solid rgba(255, 182, 193, 0.9);
       border-radius: 14px;
       box-shadow: 0 16px 36px rgba(255, 20, 147, 0.25);
+      background: rgba(255,255,255,0.06);
     }
 
     .close-button {
       position: absolute;
-      top: 20px;
-      right: 20px;
+      top: 14px;
+      right: 16px;
       color: white;
       font-size: 34px;
       cursor: pointer;
+      user-select: none;
+    }
+
+    /* если картинка не загрузилась — покажем текст */
+    .reward-error {
+      display: none;
+      margin-top: 12px;
+      font-family: TransformaMix;
+      font-size: 14px;
+      color: rgba(255,255,255,0.92);
+      text-align: center;
+      max-width: 520px;
+      line-height: 1.35;
     }
 
     .instructions {
@@ -288,10 +287,9 @@
       line-height: 1.35;
     }
 
-    /* ===== МОБИЛЬНЫЙ ФИКС: убираем мешающие сердечки ===== */
     @media (max-width: 520px) {
-      body::after { display: none; }     /* фоновые большие сердца */
-      .tile::after { display: none; }    /* сердечки в плитках */
+      body::after { display: none; }
+      .tile::after { display: none; }
     }
 
     @media (max-height: 740px) {
@@ -329,8 +327,11 @@
   </div>
 
   <div class="fullscreen-image" id="fullscreen-image">
-    <span class="close-button">&times;</span>
-    <img id="reward-image" src="" alt="Приятность">
+    <span class="close-button" id="close-button">&times;</span>
+    <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
+      <img id="reward-image" src="" alt="Приятность">
+      <div class="reward-error" id="reward-error"></div>
+    </div>
   </div>
 
   <div class="instructions">
@@ -345,9 +346,11 @@
       const gameMessage = document.getElementById('game-message');
       const restartButton = document.getElementById('restart-button');
       const rewardButton = document.getElementById('reward-button');
+
       const fullscreenImage = document.getElementById('fullscreen-image');
       const rewardImage = document.getElementById('reward-image');
-      const closeButton = document.querySelector('.close-button');
+      const rewardError = document.getElementById('reward-error');
+      const closeButton = document.getElementById('close-button');
 
       let board = [];
       let score = 0;
@@ -390,6 +393,7 @@
         scoreDisplay.textContent = score;
         gameWon = false;
         gameMessage.classList.remove('game-won');
+
         fullscreenImage.style.display = 'none';
         restartButton.style.display = 'none';
         rewardButton.style.display = 'none';
@@ -595,7 +599,6 @@
         }
       });
 
-      /* ===== ВАЖНО: делаем touch-слушатели НЕ passive и гасим скролл ===== */
       grid.addEventListener('touchstart', (e) => {
         e.preventDefault();
         touchStartX = e.touches[0].clientX;
@@ -616,18 +619,62 @@
         }
       }, { passive: false });
 
-      /* на всякий: блокируем scroll/touchmove по всему документу */
       document.addEventListener('touchmove', (e) => {
         e.preventDefault();
       }, { passive: false });
 
+      // ===== ВАЖНО: загрузка картинки с fallback по расширениям/регистру =====
+      function loadRewardImageWithFallback() {
+        rewardError.style.display = 'none';
+        rewardError.textContent = '';
+        rewardImage.removeAttribute('src');
+
+        // Поставь сюда реальные варианты имени файла, если у тебя другое!
+        const candidates = [
+          'images/win.PNG',
+          'images/win.png',
+          'images/WIN.JPG',
+          'images/WIN.jpg'
+        ];
+
+        let idx = 0;
+
+        const tryNext = () => {
+          if (idx >= candidates.length) {
+            rewardError.style.display = 'block';
+            rewardError.textContent =
+              'Картинка не найдена. Проверь путь и регистр файла.\n' +
+              'Например, если файл называется win.jpg, то в коде должно быть именно win.jpg.';
+            return;
+          }
+
+          const url = candidates[idx++] + '?t=' + Date.now();
+
+          rewardImage.onload = () => {
+            // успех — ничего больше не делаем
+          };
+
+          rewardImage.onerror = () => {
+            tryNext();
+          };
+
+          rewardImage.src = url;
+        };
+
+        tryNext();
+      }
+
       rewardButton.addEventListener('click', () => {
-        rewardImage.src = 'images/win.png';
         fullscreenImage.style.display = 'flex';
+        loadRewardImageWithFallback();
       });
 
       closeButton.addEventListener('click', () => {
         fullscreenImage.style.display = 'none';
+      });
+
+      fullscreenImage.addEventListener('click', (e) => {
+        if (e.target === fullscreenImage) fullscreenImage.style.display = 'none';
       });
 
       restartButton.addEventListener('click', () => {
